@@ -24,7 +24,8 @@ dependencies {
   implementation(Dependencies.AutoService.annotations)
   compileOnly(Dependencies.Kotlin.Ksp.api)
 
-  implementation(Dependencies.asm)
+  implementation(Dependencies.Asm.asm)
+  implementation(Dependencies.Asm.util)
   implementation(Dependencies.KotlinPoet.kotlinPoet)
   implementation(Dependencies.Moshi.moshi)
   implementation(Dependencies.Kotlin.compilerEmbeddable)

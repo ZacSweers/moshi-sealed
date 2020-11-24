@@ -19,6 +19,12 @@ object Dependencies {
   const val autoCommon = "com.google.auto:auto-common:0.11"
   const val asm = "org.ow2.asm:asm:7.1"
 
+  object Asm {
+    private const val version = "7.1"
+    const val asm = "org.ow2.asm:asm:$version"
+    const val util = "org.ow2.asm:asm-util:$version"
+  }
+
   object AutoService {
     private const val version = "1.0-rc7"
     const val annotations = "com.google.auto.service:auto-service-annotations:$version"

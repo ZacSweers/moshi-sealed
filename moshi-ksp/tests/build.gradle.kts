@@ -30,6 +30,7 @@ sourceSets {
   test {
     java {
       srcDir("build/generated/ksp/src/test/kotlin")
+      srcDir("build/generated/ksp/classes/test")
     }
   }
 }

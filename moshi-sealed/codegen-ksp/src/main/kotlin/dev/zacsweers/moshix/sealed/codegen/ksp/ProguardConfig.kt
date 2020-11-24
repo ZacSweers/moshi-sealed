@@ -31,8 +31,7 @@ import com.squareup.kotlinpoet.ClassName
  */
 internal data class ProguardConfig(
   val targetClass: ClassName,
-  val adapterName: String,
-  val adapterConstructorParams: List<String>,
+  val adapterName: String
 ) {
   private val outputFile = "META-INF/proguard/moshi-sealed-${targetClass.canonicalName}.pro"
 
@@ -46,22 +45,10 @@ internal data class ProguardConfig(
     //
     // -if class {the target class}
     // -keepnames class {the target class}
-    // -if class {the target class}
-    // -keep class {the generated adapter} {
-    //    <init>(...);
-    // }
     //
     val targetName = targetClass.reflectionName()
-    val adapterCanonicalName = ClassName(targetClass.packageName, adapterName).canonicalName
     // Keep the class name for Moshi's reflective lookup based on it
     appendLine("-if class $targetName")
     appendLine("-keepnames class $targetName")
-
-    appendLine("-if class $targetName")
-    appendLine("-keep class $adapterCanonicalName {")
-    // Keep the constructor for Moshi's reflective lookup
-    val constructorArgs = adapterConstructorParams.joinToString(",")
-    appendLine("    public <init>($constructorArgs);")
-    appendLine("}")
   }
 }
