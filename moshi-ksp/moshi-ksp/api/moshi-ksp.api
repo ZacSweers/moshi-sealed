@@ -1,6 +1,7 @@
 public final class dev/zacsweers/moshix/ksp/JsonClassSymbolProcessorProvider : com/google/devtools/ksp/processing/SymbolProcessorProvider {
 	public static final field Companion Ldev/zacsweers/moshix/ksp/JsonClassSymbolProcessorProvider$Companion;
 	public static final field OPTION_GENERATED Ljava/lang/String;
+	public static final field OPTION_PROGUARD_CODE_GENERATED Ljava/lang/String;
 	public fun <init> ()V
 	public fun create (Lcom/google/devtools/ksp/processing/SymbolProcessorEnvironment;)Lcom/google/devtools/ksp/processing/SymbolProcessor;
 }

@@ -30,6 +30,7 @@ import com.google.devtools.ksp.symbol.Origin.KOTLIN
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.moshi.JsonClass
 import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATED
+import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_PROGUARD_CODE_GENERATED
 import dev.zacsweers.moshix.ksp.shade.api.AdapterGenerator
 import dev.zacsweers.moshix.ksp.shade.api.ProguardConfig
 import dev.zacsweers.moshix.ksp.shade.api.PropertyGenerator
@@ -49,6 +50,14 @@ public class JsonClassSymbolProcessorProvider : SymbolProcessorProvider {
      *   * `"javax.annotation.Generated"` (JRE <9)
      */
     public const val OPTION_GENERATED: String = "moshi.generated"
+
+    /**
+     * This annotation processing argument can disable proguard rule generating.
+     * Normally, this is not recommended unless end-users build their own JsonAdapter look-up tool.
+     * This is enabled by default
+     */
+    public const val OPTION_PROGUARD_CODE_GENERATED: String = "moshi.enabledProguardGenerated"
+
   }
 
   override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
@@ -76,6 +85,7 @@ private class JsonClassSymbolProcessor(
       "Invalid option value for $OPTION_GENERATED. Found $it, allowable values are $POSSIBLE_GENERATED_NAMES."
     }
   }
+  private val generatedProguard = environment.options[OPTION_PROGUARD_CODE_GENERATED]?.toBooleanStrictOrNull() ?: true
 
   override fun process(resolver: Resolver): List<KSAnnotated> {
     val generatedAnnotation = generatedOption?.let {
@@ -119,7 +129,7 @@ private class JsonClassSymbolProcessor(
         val adapterGenerator = adapterGenerator(logger, resolver, type) ?: return emptyList()
         try {
           val preparedAdapter = adapterGenerator
-            .prepare { spec ->
+            .prepare(generatedProguard) { spec ->
               spec.toBuilder()
                 .apply {
                   generatedAnnotation?.let(::addAnnotation)
@@ -128,7 +138,13 @@ private class JsonClassSymbolProcessor(
                 .build()
             }
           preparedAdapter.spec.writeTo(codeGenerator)
-          preparedAdapter.proguardConfig?.writeTo(codeGenerator, originatingFile)
+          if (generatedProguard) {
+            preparedAdapter.proguardConfig?.writeTo(codeGenerator, originatingFile)
+          } else {
+            logger.warn("Moshi will not generate Proguard rule." +
+                    " obfuscation will break your application" +
+                    " unless having your own JsonAdapter look-up tool")
+          }
         } catch (e: Exception) {
           logger.error(
             "Error preparing ${type.simpleName.asString()}: ${e.stackTrace.joinToString("\n")}"

@@ -25,6 +25,7 @@ import com.tschuchort.compiletesting.kspIncremental
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessorProviders
 import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATED
+import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_PROGUARD_CODE_GENERATED
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
@@ -388,6 +389,29 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
     }.compile()
     assertThat(result.messages).contains(
       "Invalid option value for $OPTION_GENERATED"
+    )
+  }
+
+  @Test
+  fun disableProguardGenerating() {
+    val result = prepareCompilation(
+        kotlin(
+          "source.kt",
+          """
+          package test
+          import com.squareup.moshi.JsonClass
+    
+          @JsonClass(generateAdapter = true)
+          data class Foo(val a: Int)
+          """
+        )
+    ).apply {
+        kaptArgs[OPTION_PROGUARD_CODE_GENERATED] = "true"
+    }.compile()
+    assertThat(result.messages).contains(
+        "Moshi will not generate Proguard rule." +
+          " obfuscation will break your application" +
+          " unless having your own JsonAdapter look-up tool"
     )
   }
 
